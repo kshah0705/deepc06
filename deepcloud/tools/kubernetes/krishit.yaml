@@ -1,0 +1,80 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: krishit
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: krishit
+    spec:
+      volumes:
+      - hostPath:
+          path: /home/dilip/.jupyter
+        name: jupyterconfig
+      - hostPath:
+          path: /home/dilip/notebook
+        name: nb
+      - hostPath:
+          path: /home/dilip
+        name: chome
+      - hostPath:
+          path: /usr/lib/nvidia-375/bin
+        name: bin
+      - hostPath:
+          path: /usr/lib/nvidia-375
+        name: lib
+      - hostPath:
+          path: /usr/lib/x86_64-linux-gnu/libcuda.so
+        name: libcuda-so
+      - hostPath:
+          path: /usr/lib/x86_64-linux-gnu/libcuda.so.1
+        name: libcuda-so-1
+      - hostPath:
+          path: /usr/lib/x86_64-linux-gnu/libcuda.so.375.66
+        name: libcuda-so-375-66
+      containers:
+      - name: tensorflow
+        image: kshah1992/keras-jupyter
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4000
+        resources:
+          limits:
+            alpha.kubernetes.io/nvidia-gpu: 1
+        volumeMounts:
+        - mountPath: /root/.jupyter
+          name: jupyterconfig
+        - mountPath: /root/notebook
+          name: nb
+        - mountPath: /home/container
+          name: chome
+        - mountPath: /usr/local/nvidia/bin
+          name: bin
+        - mountPath: /usr/local/nvidia/lib
+          name: lib
+        - mountPath: /usr/lib/x86_64-linux-gnu/libcuda.so
+          name: libcuda-so
+        - mountPath: /usr/lib/x86_64-linux-gnu/libcuda.so.1
+          name: libcuda-so-1
+        - mountPath: /usr/lib/x86_64-linux-gnu/libcuda.so.375.66
+          name: libcuda-so-375-66
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: krishit-service
+  labels:
+    app: krishit
+spec:
+  selector:
+    app: krishit
+  ports:
+  - port: 4000
+    protocol: TCP
+    nodePort: 30061
+  type: LoadBalancer
+---
+
